@@ -52,7 +52,8 @@ public:
     void StartRecording(const winrt::Windows::Storage::StorageFolder& storageFolder, const winrt::Windows::Perception::Spatial::SpatialCoordinateSystem& worldCoordSystem);
     void StopRecording();
     winrt::Windows::Foundation::IAsyncAction InitializeAsync();
-
+    // Made this get-function to get access to the private m_latestFrame variable, which hopefully can be converted to a buffer and then a cv::MAT via imdecode() (see https://docs.opencv.org/3.4/d4/da8/group__imgcodecs.html)
+    const winrt::Windows::Media::Capture::Frames::MediaFrameReference getLatestFrame() const { return m_latestFrame; }
 protected:
     void OnFrameArrived(const winrt::Windows::Media::Capture::Frames::MediaFrameReader& sender,        
                         const winrt::Windows::Media::Capture::Frames::MediaFrameArrivedEventArgs& args);

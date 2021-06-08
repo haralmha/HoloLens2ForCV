@@ -12,6 +12,7 @@
 #include "AppMain.h"
 #include <winrt/Windows.Foundation.h>
 #include <ctime>
+#include <opencv2/aruco.hpp>
 
 using namespace DirectX;
 using namespace std;
@@ -157,7 +158,7 @@ void AppMain::Update()
 			frame.eyeGazeDistance = 0.0f;
 			// Use surface mapping to compute the distance the user is looking at
 			if (m_mixedReality.IsSurfaceMappingActive())
-			{				
+			{
 				float distance;
 				XMVECTOR normal;
 				if (m_mixedReality.GetSurfaceMappingInterface()->TestRayIntersection(frame.eyeGazeOrigin, frame.eyeGazeDirection, distance, normal))
@@ -170,6 +171,27 @@ void AppMain::Update()
 		{
 			frame.eyeGazePresent = false;
 		}
+
+		// Getting the latest frame to convert it to a cv::MAT
+		const winrt::Windows::Media::Capture::Frames::MediaFrameReference latest_frame = m_videoFrameProcessor->getLatestFrame();
+		winrt::Windows::Media::Capture::Frames::BufferMediaFrame latest_frame_buffer = latest_frame.BufferMediaFrame();
+		cv::Mat latest_image = cv::imdecode(latest_frame_buffer, 0);
+		// TODO: Make the line above work!!! :)
+		cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_6X6_250);
+		cv::Mat image, imageCopy;
+		inputVideo.retrieve(image);
+		image.copyTo(imageCopy);
+		std::vector<int> ids;
+		std::vector<std::vector<cv::Point2f> > corners;
+		cv::aruco::detectMarkers(image, dictionary, corners, ids);
+		// if at least one marker detected
+		if (ids.size() > 0)
+			cv::aruco::drawDetectedMarkers(imageCopy, corners, ids);
+		cv::imshow("out", imageCopy);
+		char key = (char)cv::waitKey(waitTime);
+		if (key == 27)
+			break;
+
 		m_hethateyeStream.AddFrame(std::move(frame));			
 		
 	}
