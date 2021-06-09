@@ -174,8 +174,22 @@ void AppMain::Update()
 
 		// Getting the latest frame to convert it to a cv::MAT
 		const winrt::Windows::Media::Capture::Frames::MediaFrameReference latest_frame = m_videoFrameProcessor->getLatestFrame();
+		std::cout << "hello";
+		
 		winrt::Windows::Media::Capture::Frames::BufferMediaFrame latest_frame_buffer = latest_frame.BufferMediaFrame();
-		cv::Mat latest_image = cv::imdecode(latest_frame_buffer, 0);
+		winrt::Windows::Storage::Streams::IBuffer ibuffer = latest_frame_buffer.Buffer();
+		
+		// What are the height and width? MediaFrameReference seems to be a bit weird
+		//W: 760, H:428
+		winrt::Windows::Graphics::Imaging::SoftwareBitmap bitmap = winrt::Windows::Graphics::Imaging::SoftwareBitmap(winrt::Windows::Graphics::Imaging::BitmapPixelFormat::Bgra8, 760, 428);
+		bitmap.CopyFromBuffer(ibuffer);
+		std::cout << "hello";
+		
+		// Try to convert SoftwareBitmap to Mat using this method (https://docs.microsoft.com/en-us/windows/uwp/audio-video-camera/process-software-bitmaps-with-opencv)
+		/*
+		cv::Mat mat = cv::Mat(bitmap.PixelHeight, bitmap.PixelWidth, CV_8UC4, pPixels);
+		// Then use this 
+		cv::Mat latest_image = cv::imdecode(bitmap., 0);
 		// TODO: Make the line above work!!! :)
 		cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_6X6_250);
 		cv::Mat image, imageCopy;
@@ -191,7 +205,7 @@ void AppMain::Update()
 		char key = (char)cv::waitKey(waitTime);
 		if (key == 27)
 			break;
-
+		*/
 		m_hethateyeStream.AddFrame(std::move(frame));			
 		
 	}
